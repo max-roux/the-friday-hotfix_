@@ -1,6 +1,6 @@
 # The Friday Hotfix_
 
-Patch notes for your data brain. A one-page site styled as a git repository.
+Patch notes for our data brains. A one-page site styled as a git repository. Full spec: [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Stack
 
@@ -32,11 +32,15 @@ Add editions under `src/content/editions/` as frontmatter-only Markdown files. S
 Copy `.env.example` to `.env` and set:
 
 
-| Variable               | Purpose                              |
-| ---------------------- | ------------------------------------ |
-| `PUBLIC_SITE_URL`      | Canonical URL + Slack subscribe line (**required** for `npm run build`) |
-| `PUBLIC_LINKEDIN_URL`  | Blame section link                   |
-| `PUBLIC_SUBSCRIBE_URL` | Newsletter provider POST endpoint    |
+| Variable                         | Purpose                                                                 |
+| -------------------------------- | ----------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`                | Canonical URL, Slack "Follow:" line, RSS and release links (**required** for `npm run build`) |
+| `PUBLIC_LINKEDIN_URL`            | Blame section link                                                      |
+| `PUBLIC_LINKEDIN_NEWSLETTER_URL` | Follow → linkedin (falls back to the profile)                           |
+| `PUBLIC_GITHUB_URL`              | Follow → github releases                                                |
 
+## Delivery
 
-Until `PUBLIC_SUBSCRIBE_URL` is set, subscribe fakes success in `npm run dev` only (use `*@fail.test` to simulate a network error); production builds show an error instead of dropping signups.
+- **LinkedIn newsletter**: posted by hand; start from an edition's "copy for slack" text.
+- **RSS**: `/rss.xml`, built with the site.
+- **GitHub releases**: `.github/workflows/release.yml` creates a release per new edition on pushes to `main`, using `/releases/{version}.md` from the build. Set `PUBLIC_SITE_URL` as an Actions variable (Settings → Secrets and variables → Actions → Variables).

@@ -1,0 +1,35 @@
+# One GitHub release per edition (docs/SPEC.md §5.9). Readers follow with Watch → Custom → Releases.
+name: release editions
+
+on:
+  push:
+    branches: [main]
+    paths: ['src/content/editions/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      - name: Create missing releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for notes in dist/releases/*.md; do
+            version=$(basename "$notes" .md)
+            if gh release view "$version" >/dev/null 2>&1; then continue; fi
+            title=$(head -n1 "$notes" | sed 's/^\*\*//; s/\*\*$//')
+            gh release create "$version" --target "$GITHUB_SHA" --title "$version · $title" --notes-file "$notes"
+          done

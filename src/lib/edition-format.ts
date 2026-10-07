@@ -76,7 +76,64 @@ export function slackCopy(edition: PreparedEdition, siteUrl: string): string {
   lines.push('// from my prod');
   lines.push(edition.prod);
   lines.push('');
-  lines.push(`Subscribe: ${siteUrl}`);
+  lines.push(`Follow: ${siteUrl}`);
 
   return lines.join('\n');
+}
+
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** RSS 2.0 feed (§5.9). `description` is HTML, escaped once more for XML. */
+export function rssFeed(
+  editions: PreparedEdition[],
+  siteUrl: string,
+  description: string,
+): string {
+  const items = editions.map((edition) => {
+    const link = new URL(`/${edition.version}`, siteUrl).toString();
+    const html =
+      `<ul>${edition.items
+        .map((i) => `<li>${esc(i.label)} <a href="${esc(i.url)}">${esc(i.title)}</a>: ${esc(i.take)}</li>`)
+        .join('')}</ul>` + `<p>// from my prod<br>${esc(edition.prod)}</p>`;
+    return [
+      '<item>',
+      `<title>${esc(`${edition.version} · ${edition.title}`)}</title>`,
+      `<link>${link}</link>`,
+      `<guid isPermaLink="true">${link}</guid>`,
+      `<pubDate>${edition.date.toUTCString()}</pubDate>`,
+      `<description>${esc(html)}</description>`,
+      '</item>',
+    ].join('');
+  });
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<rss version="2.0"><channel>',
+    '<title>The Friday Hotfix</title>',
+    `<link>${esc(siteUrl)}</link>`,
+    `<description>${esc(description)}</description>`,
+    '<language>en</language>',
+    ...items,
+    '</channel></rss>',
+  ].join('\n');
+}
+
+/** Markdown notes for the edition's GitHub release (§5.9). */
+export function releaseNotes(edition: PreparedEdition, siteUrl: string): string {
+  const { changed, plus, minus } = edition.stats;
+  return [
+    `**${edition.title}**`,
+    '',
+    ...edition.items.map(
+      (i) => `- \`${i.label}\` [${i.title}](${i.url}) \`[${i.topic}]\`: ${i.take}`,
+    ),
+    '',
+    '> // from my prod',
+    `> ${edition.prod}`,
+    '',
+    `${changed}, ${plus}, ${minus}`,
+    '',
+    `Read it on the site: ${new URL(`/${edition.version}`, siteUrl)}`,
+    '',
+  ].join('\n');
 }

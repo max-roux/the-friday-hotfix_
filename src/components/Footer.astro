@@ -1,6 +1,17 @@
+---
+interface Props {
+  /** Hide the "press ?" hint where there are no shortcuts (404). */
+  shortcuts?: boolean;
+}
+const { shortcuts = true } = Astro.props;
+---
+
 <footer class="site-footer">
   <div class="col site-footer__inner">
     <span>merged into main. no tests were run.</span>
-    <span><span class="site-footer__keys">press ? for shortcuts · </span>EOF</span>
+    <span class="site-footer__eof">
+      <span>{shortcuts && <span class="site-footer__keys">press ? for shortcuts · </span>}EOF</span>
+      <img class="site-footer__dot" src="/brand/dot-shipped.svg" width="12" height="12" alt="" />
+    </span>
   </div>
 </footer>

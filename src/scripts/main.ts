@@ -1,7 +1,3 @@
-import { subscribe } from '../lib/subscribe';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -218,60 +214,18 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-/* —— 5.7 subscribe —— */
-function initSubscribe(): void {
-  const form = document.querySelector<HTMLFormElement>('[data-subscribe-form]');
-  const input = document.querySelector<HTMLInputElement>('[data-subscribe-input]');
-  const submit = document.querySelector<HTMLButtonElement>('[data-subscribe-submit]');
-  const status = document.querySelector<HTMLElement>('[data-subscribe-status]');
-  if (!form || !input || !submit || !status) return;
-
-  const setStatus = (
-    message: string,
-    kind: 'error' | 'ok' | 'muted' | '',
-  ) => {
-    status.textContent = message;
-    status.classList.remove('is-error', 'is-ok', 'is-muted');
-    if (kind === 'error') status.classList.add('is-error');
-    if (kind === 'ok') status.classList.add('is-ok');
-    if (kind === 'muted') status.classList.add('is-muted');
-  };
-
-  input.addEventListener('input', () => setStatus('', ''));
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const value = input.value.trim();
-
-    if (!value) {
-      setStatus('fatal: nothing to push. add an email first.', 'error');
-      return;
-    }
-    if (!EMAIL_RE.test(value)) {
-      setStatus(
-        `fatal: '${value}' does not appear to be a valid email`,
-        'error',
-      );
-      return;
-    }
-
-    setStatus('pushing…', 'muted');
-    submit.disabled = true;
-    try {
-      await subscribe(value);
-      setStatus(
-        '✓ pushed to origin/inbox. first hotfix lands friday.',
-        'ok',
-      );
-      input.value = '';
-    } catch {
-      setStatus(
-        'fatal: unable to reach origin. try again in a minute.',
-        'error',
-      );
-    } finally {
-      submit.disabled = false;
-    }
+/* —— 5.7 follow prompt hints —— */
+function initFollowHints(): void {
+  const hint = document.querySelector<HTMLElement>('[data-follow-hint]');
+  if (!hint) return;
+  const idle = hint.textContent ?? '';
+  document.querySelectorAll<HTMLElement>('[data-hint]').forEach((link) => {
+    const show = () => (hint.textContent = link.dataset.hint ?? idle);
+    const reset = () => (hint.textContent = idle);
+    link.addEventListener('pointerenter', show);
+    link.addEventListener('focus', show);
+    link.addEventListener('pointerleave', reset);
+    link.addEventListener('blur', reset);
   });
 }
 
@@ -444,7 +398,7 @@ function bootstrap(): void {
   initOneline();
   initGrep();
   initCopySlack();
-  initSubscribe();
+  initFollowHints();
   initShortcuts();
   initKeyboardNav();
   initGraph();

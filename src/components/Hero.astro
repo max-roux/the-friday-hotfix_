@@ -1,5 +1,7 @@
 ---
 import {
+  GITHUB_URL,
+  LINKEDIN_NEWSLETTER_URL,
   SITE_INTRO_LEAD,
   SITE_INTRO_SHIPPED,
   SITE_INTRO_TOPICS,
@@ -22,27 +24,34 @@ import {
       </span>
       <span class="hero__intro-line">{SITE_INTRO_SHIPPED}</span>
     </p>
-    <div class="hero__subscribe" id="subscribe">
-      <form class="subscribe-form" data-subscribe-form novalidate>
-        <label class="subscribe-form__label" for="subscribe-email">
-          $ git remote add inbox
-        </label>
-        <input
-          class="subscribe-form__input"
-          id="subscribe-email"
-          name="email"
-          type="email"
-          autocomplete="email"
-          placeholder="you@company.com"
-          data-subscribe-input
-        />
-        <button class="subscribe-form__submit" type="submit" data-subscribe-submit>
-          push ↵
-        </button>
-      </form>
-      <p class="hero__status" role="status" data-subscribe-status aria-live="polite"></p>
+    <div class="hero__follow">
+      <div class="follow" id="follow" role="group" aria-labelledby="follow-label">
+        <span class="follow__label" id="follow-label">$ git remote add friday</span>
+        <a
+          class="follow__link follow__link--primary"
+          href={LINKEDIN_NEWSLETTER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-hint="→ linkedin newsletter. lands in your feed every friday."
+        >
+          linkedin ↗
+        </a>
+        <a class="follow__link" href="/rss.xml" data-hint="→ /rss.xml. for people who still own a feed reader (respect).">
+          rss
+        </a>
+        <a
+          class="follow__link"
+          href={`${GITHUB_URL}/releases`}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-hint="→ github releases. watch → custom → releases."
+        >
+          github ↗
+        </a>
+      </div>
+      <p class="hero__hint" data-follow-hint>pick a remote. same patch notes on all three.</p>
     </div>
-    <p class="hero__footnote">fridays · ~5 min · unsubscribe = git remote remove</p>
+    <p class="hero__footnote">fridays · ~5 min · unfollow = git remote remove friday</p>
   </div>
 </section>
 

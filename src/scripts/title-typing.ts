@@ -42,11 +42,11 @@ async function runTitleTypingSequence(el: HTMLElement): Promise<void> {
 
   await sleep(PAUSE_BEFORE_MS);
 
-  // Wrong start: Danish "Fredag" + stray "H" → rewrite as "Friday Hotfix".
+  // Wrong start: Danish "Fredag" + stray "H", back to "The Fr", then finish (≈2.55s total, §5.1).
   await typeInto(el, 'The Fredag H');
   await sleep(PAUSE_AFTER_TYPO_MS);
-  await backspace(el, 8); // "Fredag H" (incl. space before H)
-  await typeInto(el, 'Friday Hotfix');
+  await backspace(el, 6); // "edag H" → "The Fr"
+  await typeInto(el, 'iday Hotfix');
 
   el.dataset.typed = 'done';
   if (el.textContent !== TITLE) {

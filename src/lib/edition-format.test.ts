@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { formatEditionDate, orderItems, slackCopy, type PreparedEdition } from './edition-format.ts';
+import {
+  formatEditionDate,
+  orderItems,
+  releaseNotes,
+  rssFeed,
+  slackCopy,
+  type PreparedEdition,
+} from './edition-format.ts';
 
 const item = (kind: 'new' | 'fixed' | 'known' | 'deprecated', title: string) => ({
   kind,
@@ -32,19 +39,20 @@ test('formatEditionDate uses UTC', () => {
   assert.equal(formatEditionDate(new Date('2026-10-09')), 'Fri 9 Oct 2026');
 });
 
-test('slackCopy renders header, items, prod and subscribe link', () => {
-  const edition: PreparedEdition = {
-    id: 'w1',
-    version: 'v1',
-    date: new Date('2026-10-09'),
-    title: 'Title',
-    prod: 'prod note',
-    stats: { changed: '', plus: '', minus: '' },
-    hash: 'abc1234',
-    isHead: true,
-    dateLabel: 'Fri 9 Oct 2026',
-    items: orderItems('v1', [item('new', 'n')]),
-  };
+const edition: PreparedEdition = {
+  id: 'w1',
+  version: 'v1',
+  date: new Date('2026-10-09'),
+  title: 'Title',
+  prod: 'prod note',
+  stats: { changed: '', plus: '', minus: '' },
+  hash: 'abc1234',
+  isHead: true,
+  dateLabel: 'Fri 9 Oct 2026',
+  items: orderItems('v1', [item('new', 'n')]),
+};
+
+test('slackCopy renders header, items, prod and follow link', () => {
   assert.equal(
     slackCopy(edition, 'https://site.test'),
     [
@@ -58,7 +66,21 @@ test('slackCopy renders header, items, prod and subscribe link', () => {
       '// from my prod',
       'prod note',
       '',
-      'Subscribe: https://site.test',
+      'Follow: https://site.test',
     ].join('\n'),
   );
+});
+
+test('rssFeed links each edition and double-escapes HTML descriptions', () => {
+  const xml = rssFeed([{ ...edition, title: 'R&D <live>' }], 'https://site.test', 'desc');
+  assert.match(xml, /<title>v1 · R&amp;D &lt;live&gt;<\/title>/);
+  assert.match(xml, /<guid isPermaLink="true">https:\/\/site.test\/v1<\/guid>/);
+  assert.match(xml, /<pubDate>Fri, 09 Oct 2026 00:00:00 GMT<\/pubDate>/);
+  assert.match(xml, /&lt;a href=&quot;https:\/\/example.com\/n&quot;&gt;n&lt;\/a&gt;/);
+});
+
+test('releaseNotes renders markdown with a link back to the edition', () => {
+  const md = releaseNotes(edition, 'https://site.test');
+  assert.match(md, /^\*\*Title\*\*\n\n- `\+ new` \[n\]\(https:\/\/example.com\/n\) `\[ai\]`: n take\n/);
+  assert.match(md, /Read it on the site: https:\/\/site.test\/v1\n$/);
 });
