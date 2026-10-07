@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Home from '../components/Home.astro';
 import { getEditions } from '../lib/editions';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../lib/site';
+import { SITE_DESCRIPTION } from '../lib/site';
 
 export async function getStaticPaths() {
   const editions = await getEditions();

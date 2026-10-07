@@ -17,12 +17,10 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 let selectedIndex = -1;
-let shortcutsTrigger: HTMLElement | null = null;
 let graphPending = false;
 let lastFill = -1;
 let toggleOneline = () => {};
 let toggleShortcuts = () => {};
-let closeShortcuts = () => {};
 
 /* —— 5.4 expandable editions —— */
 function initEditions(): void {
@@ -86,7 +84,7 @@ function handleInitialHash(): void {
 }
 
 function initFocusVersion(): void {
-  const focusVersion = document.body.dataset.focusVersion;
+  const focusVersion = document.querySelector<HTMLElement>('[data-page]')?.dataset.focusVersion;
   if (!focusVersion) return;
   const edition = document.querySelector<HTMLElement>(
     `[data-edition][data-version="${CSS.escape(focusVersion)}"]`,
@@ -317,27 +315,15 @@ function selectItem(index: number): void {
 }
 
 function initShortcuts(): void {
-  const dialog = document.querySelector<HTMLElement>('[data-shortcuts]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-shortcuts]');
   const openBtn = document.querySelector<HTMLButtonElement>('[data-shortcuts-open]');
   const closeBtn = document.querySelector<HTMLButtonElement>('[data-shortcuts-close]');
   if (!dialog || !openBtn || !closeBtn) return;
 
-  const setOpen = (open: boolean) => {
-    dialog.dataset.open = open ? 'true' : 'false';
-    dialog.hidden = !open;
-    if (open) {
-      shortcutsTrigger = openBtn;
-      closeBtn.focus();
-    } else if (shortcutsTrigger) {
-      shortcutsTrigger.focus();
-      shortcutsTrigger = null;
-    }
-  };
-
-  toggleShortcuts = () => setOpen(dialog.dataset.open !== 'true');
-  closeShortcuts = () => setOpen(false);
+  // Native modal <dialog>: Esc, focus trap and focus return come for free.
+  toggleShortcuts = () => (dialog.open ? dialog.close() : dialog.showModal());
   openBtn.addEventListener('click', toggleShortcuts);
-  closeBtn.addEventListener('click', closeShortcuts);
+  closeBtn.addEventListener('click', () => dialog.close());
 }
 
 function initKeyboardNav(): void {
@@ -350,11 +336,6 @@ function initKeyboardNav(): void {
     if (key === '?' || (key === '/' && event.shiftKey)) {
       event.preventDefault();
       toggleShortcuts();
-      return;
-    }
-
-    if (key === 'Escape') {
-      closeShortcuts();
       return;
     }
 
@@ -455,7 +436,6 @@ function initGraph(): void {
 
 /* —— bootstrap (after all lets/functions are initialized) —— */
 function bootstrap(): void {
-  document.documentElement.classList.add('js');
   if (prefersReducedMotion()) {
     document.documentElement.classList.add('reduced-motion');
   }
@@ -468,8 +448,9 @@ function bootstrap(): void {
   initShortcuts();
   initKeyboardNav();
   initGraph();
-  initFocusVersion();
-  handleInitialHash();
+  // A #hash wins over the edition route's default focus (avoids scrolling twice).
+  if (window.location.hash) handleInitialHash();
+  else initFocusVersion();
 }
 
 if (document.readyState === 'loading') {

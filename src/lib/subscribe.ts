@@ -6,7 +6,9 @@ export async function subscribe(email: string): Promise<void> {
   const endpoint = import.meta.env.PUBLIC_SUBSCRIBE_URL as string | undefined;
 
   if (!endpoint) {
-    // Placeholder until a provider is chosen: succeed after a short delay.
+    // Never fake success in production: that would silently drop signups.
+    if (!import.meta.env.DEV) throw new Error('PUBLIC_SUBSCRIBE_URL is not set');
+    // Dev placeholder: succeed after a short delay.
     await new Promise((resolve) => setTimeout(resolve, 700));
     if (email.endsWith('@fail.test')) {
       throw new Error('network');

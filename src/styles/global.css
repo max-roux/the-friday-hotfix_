@@ -14,7 +14,7 @@
   --dialog-muted: #b9bcbf;
 
   /* type */
-  --font: 'IBM Plex Mono', ui-monospace, monospace;
+  --font: var(--font-plex); /* registered in astro.config.mjs */
   --fs-base: 15px;
   --lh-base: 1.7;
   --fs-small: 13px;
@@ -796,11 +796,16 @@ body.oneline .edition__stats {
   color: var(--muted);
 }
 
+/* Keyboard hint is meaningless on touch-only devices. */
+@media (hover: none) {
+  .site-footer__keys {
+    display: none;
+  }
+}
+
 /* —— Shortcuts dialog —— */
 .shortcuts {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
   width: 300px;
   max-width: calc(100% - 48px);
   background: var(--ink);
@@ -809,16 +814,14 @@ body.oneline .edition__stats {
   padding: 16px 16px 12px;
   font-size: var(--fs-small);
   line-height: 2;
-  z-index: 100;
-  display: none;
+  /* reset native <dialog> centering/chrome */
+  inset: auto 24px 24px auto;
+  margin: 0;
+  border: 0;
 }
 
-.shortcuts[data-open='true'] {
-  display: block;
-}
-
-html:not(.js) .shortcuts {
-  display: none !important;
+.shortcuts::backdrop {
+  background: transparent;
 }
 
 .shortcuts__header {

@@ -1,6 +1,8 @@
-/** Placeholders from §8 — override with PUBLIC_* env vars when ready. */
-export const SITE_URL =
-  import.meta.env.PUBLIC_SITE_URL ?? 'https://fridayhotfix.example';
+/** From `site` in astro.config.mjs (set via PUBLIC_SITE_URL). */
+if (import.meta.env.PROD && !import.meta.env.SITE) {
+  throw new Error('PUBLIC_SITE_URL must be set for production builds (canonical, OG and Slack URLs).');
+}
+export const SITE_URL = import.meta.env.SITE ?? 'http://localhost:4321';
 
 export const LINKEDIN_URL =
   import.meta.env.PUBLIC_LINKEDIN_URL ?? 'https://www.linkedin.com/in/maxime-roux-pro/';

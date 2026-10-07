@@ -25,9 +25,3 @@ const { editions, focusVersion } = Astro.props;
   <Footer />
   <ShortcutsDialog />
 </div>
-
-<script define:vars={{ focusVersion }}>
-  if (focusVersion) {
-    document.body.dataset.focusVersion = focusVersion;
-  }
-</script>
