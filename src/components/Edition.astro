@@ -1,0 +1,126 @@
+---
+import type { PreparedEdition } from '../lib/editions';
+import { slackCopy } from '../lib/editions';
+import { SITE_URL } from '../lib/site';
+
+interface Props {
+  edition: PreparedEdition;
+  /** When set (edition route), that edition starts expanded even if not HEAD. */
+  focusVersion?: string;
+}
+
+const { edition, focusVersion } = Astro.props;
+// Render expanded for no-JS; client collapses non-HEAD / non-focus on boot.
+const preferExpanded =
+  edition.isHead || (focusVersion !== undefined && focusVersion === edition.version);
+const label = edition.isHead
+  ? `(HEAD -> main, tag: ${edition.version})`
+  : `tag: ${edition.version}`;
+const slack = slackCopy(edition, SITE_URL);
+---
+
+<article
+  class:list={['edition', { 'edition--head': edition.isHead }]}
+  id={edition.version}
+  data-edition
+  data-version={edition.version}
+  data-prefer-expanded={preferExpanded ? 'true' : 'false'}
+  data-expanded="true"
+  data-slack={slack}
+>
+  <span
+    class:list={['edition__dot', { 'is-head': edition.isHead }]}
+    data-graph-dot
+    aria-hidden="true"
+  ></span>
+
+  <button
+    class="edition__header"
+    type="button"
+    aria-expanded="true"
+    data-edition-toggle
+  >
+    <span class="edition__meta">
+      <span>{edition.hash}</span>
+      <span aria-hidden="true">·</span>
+      <span class:list={['edition__label', { 'is-head': edition.isHead }]}>{label}</span>
+      <span aria-hidden="true">·</span>
+      <span>{edition.dateLabel}</span>
+    </span>
+    <span class="edition__toggle-icon" data-edition-icon aria-hidden="true">[−]</span>
+  </button>
+
+  <h2 class="edition__title">{edition.title}</h2>
+
+  <div class="edition__body" data-edition-body>
+    <ul class="item-list" data-item-list>
+      {
+        edition.items.map((item) => (
+          <li
+            class="item"
+            id={item.id}
+            data-item
+            data-topic={item.topic}
+            data-kind={item.kind}
+          >
+            <div
+              class:list={[
+                'item__kind',
+                { 'is-deprecated': item.kind === 'deprecated' },
+              ]}
+            >
+              {item.label}
+              <span class="item__topic">[{item.topic}]</span>
+            </div>
+            <div class="item__content">
+              <div class="item__title-row">
+                <a
+                  class:list={[
+                    'item__link',
+                    { 'is-deprecated': item.kind === 'deprecated' },
+                  ]}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-item-link
+                >
+                  {item.title} ↗
+                </a>
+                <a
+                  class="item__permalink"
+                  href={`#${item.id}`}
+                  aria-label="Permalink to this item"
+                >
+                  #
+                </a>
+              </div>
+              <p class="item__take">{item.take}</p>
+            </div>
+          </li>
+        ))
+      }
+      <li class="item-list__empty" data-empty-row>
+        no items match --grep=<span data-empty-topic>*</span> in this edition
+      </li>
+    </ul>
+
+    <div class="edition__prod" data-prod>
+      <p class="edition__prod-label">// from my prod</p>
+      <p class="edition__prod-text">{edition.prod}</p>
+    </div>
+
+    <p class="edition__stats" data-stats>
+      {edition.stats.changed},{' '}
+      <span class="diff-add">{edition.stats.plus}</span>,{' '}
+      <span class="diff-del">{edition.stats.minus}</span>
+    </p>
+
+    <div class="edition__actions">
+      <button class="copy-btn" type="button" data-copy-slack>
+        copy for slack
+      </button>
+      <a class="edition__permalink" href={`#${edition.version}`}>permalink #</a>
+    </div>
+    <div class="copy-fallback" data-copy-fallback hidden></div>
+  </div>
+</article>

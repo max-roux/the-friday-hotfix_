@@ -1,0 +1,33 @@
+---
+import type { PreparedEdition } from '../lib/editions';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import Log from './Log.astro';
+import Blame from './Blame.astro';
+import Footer from './Footer.astro';
+import ShortcutsDialog from './ShortcutsDialog.astro';
+
+interface Props {
+  editions: PreparedEdition[];
+  focusVersion?: string;
+}
+
+const { editions, focusVersion } = Astro.props;
+---
+
+<div data-page data-focus-version={focusVersion}>
+  <Header />
+  <main>
+    <Hero />
+    <Log editions={editions} focusVersion={focusVersion} />
+    <Blame />
+  </main>
+  <Footer />
+  <ShortcutsDialog />
+</div>
+
+<script define:vars={{ focusVersion }}>
+  if (focusVersion) {
+    document.body.dataset.focusVersion = focusVersion;
+  }
+</script>
