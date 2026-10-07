@@ -20,6 +20,7 @@ npm run dev
 ```bash
 npm run build
 npm run preview
+npm test
 ```
 
 ## Content
@@ -33,9 +34,9 @@ Copy `.env.example` to `.env` and set:
 
 | Variable               | Purpose                              |
 | ---------------------- | ------------------------------------ |
-| `PUBLIC_SITE_URL`      | Canonical URL + Slack subscribe line |
+| `PUBLIC_SITE_URL`      | Canonical URL + Slack subscribe line (**required** for `npm run build`) |
 | `PUBLIC_LINKEDIN_URL`  | Blame section link                   |
 | `PUBLIC_SUBSCRIBE_URL` | Newsletter provider POST endpoint    |
 
 
-Until `PUBLIC_SUBSCRIBE_URL` is set, subscribe succeeds locally (use `*@fail.test` to simulate a network error).
+Until `PUBLIC_SUBSCRIBE_URL` is set, subscribe fakes success in `npm run dev` only (use `*@fail.test` to simulate a network error); production builds show an error instead of dropping signups.

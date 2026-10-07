@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '../lib/site';
 
@@ -22,6 +23,7 @@ const canonical = new URL(canonicalPath, SITE_URL).toString();
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Decides before first paint whether the hero title types itself; title-typing.ts follows this class. -->
     <script is:inline>
       (function () {
         var key = 'fh-title-typed';
@@ -60,12 +62,7 @@ const canonical = new URL(canonicalPath, SITE_URL).toString();
 
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <Font cssVariable="--font-plex" preload />
     <title>{title}</title>
   </head>
   <body>
