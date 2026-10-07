@@ -16,6 +16,7 @@ const editions = defineCollection({
     version: z.string(),
     date: z.coerce.date(),
     title: z.string(),
+    mood: z.enum(['shipped', 'hype-detected', 'merge-conflict', 'friday']).optional(),
     items: z.array(itemSchema),
     prod: z.string(),
     stats: z.object({
