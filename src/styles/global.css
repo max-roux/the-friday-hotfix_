@@ -458,14 +458,6 @@ html:not(.js) .edition {
   border: none;
 }
 
-.edition__dot--mood {
-  /* Centred on the same point as the 13px dot (the graph line). */
-  left: -48.5px;
-  top: -2.5px;
-  width: 30px;
-  height: 30px;
-  background: none;
-}
 
 .edition__dot.is-passed:not(.is-head) {
   background: var(--ink);

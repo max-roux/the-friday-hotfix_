@@ -28,24 +28,11 @@ const slack = slackCopy(edition, SITE_URL);
   data-expanded="true"
   data-slack={slack}
 >
-  {
-    edition.isHead && edition.mood ? (
-      <img
-        class="edition__dot edition__dot--mood is-head"
-        src={`/brand/dot-${edition.mood}.svg`}
-        width="30"
-        height="30"
-        alt=""
-        data-graph-dot
-      />
-    ) : (
-      <span
-        class:list={['edition__dot', { 'is-head': edition.isHead }]}
-        data-graph-dot
-        aria-hidden="true"
-      ></span>
-    )
-  }
+  <span
+    class:list={['edition__dot', { 'is-head': edition.isHead }]}
+    data-graph-dot
+    aria-hidden="true"
+  ></span>
 
   <button
     class="edition__header"
