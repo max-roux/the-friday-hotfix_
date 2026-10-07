@@ -123,6 +123,12 @@ button:disabled {
   gap: 0.35em;
 }
 
+.site-header__mark {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
 .site-header__brand:hover {
   text-decoration: none;
 }
