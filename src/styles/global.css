@@ -123,6 +123,12 @@ button:disabled {
   gap: 0.35em;
 }
 
+.site-header__mark {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
 .site-header__brand:hover {
   text-decoration: none;
 }
@@ -143,20 +149,6 @@ button:disabled {
   align-items: center;
   gap: 24px;
   font-size: var(--fs-nav);
-}
-
-.site-nav__branch {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  min-height: 44px;
-}
-
-.site-nav__branch svg {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
 }
 
 .site-nav a {
@@ -451,6 +443,15 @@ html:not(.js) .edition {
 .edition__dot.is-head {
   background: var(--accent);
   border: none;
+}
+
+.edition__dot--mood {
+  /* Centred on the same point as the 13px dot (the graph line). */
+  left: -48.5px;
+  top: -2.5px;
+  width: 30px;
+  height: 30px;
+  background: none;
 }
 
 .edition__dot.is-passed:not(.is-head) {

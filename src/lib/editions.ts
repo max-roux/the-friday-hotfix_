@@ -15,12 +15,13 @@ export async function getEditions(): Promise<PreparedEdition[]> {
   );
 
   return sorted.map((entry, index) => {
-    const { version, date, title, items, prod, stats } = entry.data;
+    const { version, date, title, mood, items, prod, stats } = entry.data;
     return {
       id: entry.id,
       version,
       date,
       title,
+      mood,
       prod,
       stats,
       hash: editionHash(version),
