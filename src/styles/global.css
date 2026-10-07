@@ -1,13 +1,13 @@
 :root {
-  /* colour */
-  --paper: #f6f4f0;
+  /* colour — crisp, closest to a code editor */
+  --paper: #ffffff;
   --ink: #1b1d1f;
   --text-2: #3a3d40;
   --muted: #5f6368;
-  --hairline: #ddd9d2;
-  --border: #cfcac2;
-  --row-active: #ece8e1;
-  --field: #fbfaf8;
+  --hairline: #e6e6e6; /* line */
+  --border: #d4d4d4;
+  --row-active: #f2f2f2; /* highlight */
+  --field: #f2f2f2;
   --accent: #b8322f;
   --diff-add: #2f6b4f;
   --diff-del: #a33a2e;
@@ -197,8 +197,31 @@ button:disabled {
   display: inline;
 }
 
+/*
+  Title text:
+  - No JS: show the finished title via ::before.
+  - JS + first visit (title-will-type): stay empty until the typing script runs (no flash).
+  - JS + returning visit: show finished title via ::before only while the span is still empty.
+*/
+html:not(.js) [data-title-typed]::before,
+html.js:not(.title-will-type) [data-title-typed]:empty::before {
+  content: 'The Friday Hotfix';
+}
+
+html.title-will-type [data-title-typed]::before {
+  content: none;
+}
+
 .cursor {
   display: inline;
+  /* Solid while typing / backspacing — blink only when idle. */
+}
+
+.cursor.is-idle {
+  animation: blink 1s steps(1) infinite;
+}
+
+html:not(.js) .cursor {
   animation: blink 1s steps(1) infinite;
 }
 
@@ -217,6 +240,14 @@ button:disabled {
   margin: 32px 0 0;
   max-width: 560px;
   color: var(--text-2);
+}
+
+.hero__intro-line {
+  display: block;
+}
+
+.hero__intro-line--lead {
+  white-space: nowrap;
 }
 
 .hero__subscribe {
@@ -732,7 +763,7 @@ body.oneline .edition__stats {
 
 .blame__bio {
   margin: 16px 0 0;
-  max-width: 560px;
+  max-width: 1000px;
   color: var(--text-2);
 }
 

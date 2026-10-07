@@ -22,6 +22,27 @@ const canonical = new URL(canonicalPath, SITE_URL).toString();
 <!doctype html>
 <html lang="en">
   <head>
+    <script is:inline>
+      (function () {
+        var key = 'fh-title-typed';
+        var root = document.documentElement;
+        root.classList.add('js');
+        try {
+          var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var force = /(?:\?|&)retype(?:&|=|$)/.test(location.search);
+          if (force) localStorage.removeItem(key);
+          var done = localStorage.getItem(key) === '1';
+          var isDev =
+            location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+          // Mark before paint so CSS can hide the finished title and avoid a flash.
+          if (!reduce && (force || isDev || !done)) {
+            root.classList.add('title-will-type');
+          }
+        } catch (e) {
+          root.classList.add('title-will-type');
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />

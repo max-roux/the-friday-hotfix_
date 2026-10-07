@@ -1,7 +1,5 @@
 import { subscribe } from '../lib/subscribe';
 
-const TITLE = 'The Friday Hotfix';
-const TITLE_STORAGE_KEY = 'fh-title-typed';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function prefersReducedMotion(): boolean {
@@ -12,71 +10,19 @@ function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
 }
 
-function safeLocalStorageGet(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function safeLocalStorageSet(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    /* ignore */
-  }
-}
-
 function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable;
 }
 
-/* —— bootstrap —— */
-document.documentElement.classList.add('js');
-if (prefersReducedMotion()) {
-  document.documentElement.classList.add('reduced-motion');
-}
-
-initTitleTyping();
-initEditions();
-initOneline();
-initGrep();
-initCopySlack();
-initSubscribe();
-initShortcuts();
-initKeyboardNav();
-initGraph();
-handleInitialHash();
-
-/* —— 5.1 typing title —— */
-function initTitleTyping(): void {
-  const typed = document.querySelector<HTMLElement>('[data-title-typed]');
-  if (!typed) return;
-
-  const alreadyTyped = safeLocalStorageGet(TITLE_STORAGE_KEY) === '1';
-  if (alreadyTyped || prefersReducedMotion()) {
-    typed.textContent = TITLE;
-    return;
-  }
-
-  typed.textContent = '';
-  window.setTimeout(() => {
-    let i = 0;
-    const tick = () => {
-      i += 1;
-      typed.textContent = TITLE.slice(0, i);
-      if (i < TITLE.length) {
-        window.setTimeout(tick, 95);
-      } else {
-        safeLocalStorageSet(TITLE_STORAGE_KEY, '1');
-      }
-    };
-    tick();
-  }, 500);
-}
+let selectedIndex = -1;
+let shortcutsTrigger: HTMLElement | null = null;
+let graphPending = false;
+let lastFill = -1;
+let toggleOneline = () => {};
+let toggleShortcuts = () => {};
+let closeShortcuts = () => {};
 
 /* —— 5.4 expandable editions —— */
 function initEditions(): void {
@@ -115,46 +61,37 @@ function expandEdition(edition: HTMLElement): void {
   setExpanded(edition, true, icon, toggle);
 }
 
-function handleInitialHash(): void {
-  const hash = window.location.hash.slice(1);
-  if (!hash) return;
-
-  const target =
-    document.getElementById(hash) ??
-    document.querySelector<HTMLElement>(`[data-version="${CSS.escape(hash)}"]`);
-  if (!target) return;
-
+function openAndScroll(target: HTMLElement): void {
   const edition =
     target.closest<HTMLElement>('[data-edition]') ??
     (target.matches('[data-edition]') ? target : null);
   if (edition) expandEdition(edition);
 
-  // Edition route may land without a hash; pages set data-focus-scroll.
-  requestAnimationFrame(() => {
+  window.setTimeout(() => {
     target.scrollIntoView({
       behavior: prefersReducedMotion() ? 'auto' : 'smooth',
       block: 'start',
     });
     scheduleGraphUpdate();
-  });
+  }, 0);
 }
 
-// Focus edition from static route (/v2026.41)
-const focusVersion = document.body.dataset.focusVersion;
-if (focusVersion) {
+function handleInitialHash(): void {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+  const target =
+    document.getElementById(hash) ??
+    document.querySelector<HTMLElement>(`[data-version="${CSS.escape(hash)}"]`);
+  if (target) openAndScroll(target);
+}
+
+function initFocusVersion(): void {
+  const focusVersion = document.body.dataset.focusVersion;
+  if (!focusVersion) return;
   const edition = document.querySelector<HTMLElement>(
     `[data-edition][data-version="${CSS.escape(focusVersion)}"]`,
   );
-  if (edition) {
-    expandEdition(edition);
-    requestAnimationFrame(() => {
-      edition.scrollIntoView({
-        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-        block: 'start',
-      });
-      scheduleGraphUpdate();
-    });
-  }
+  if (edition) openAndScroll(edition);
 }
 
 /* —— 5.2 --oneline —— */
@@ -167,13 +104,8 @@ function initOneline(): void {
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   };
 
-  btn.addEventListener('click', () => {
-    apply(document.body.classList.contains('oneline') === false);
-  });
-
-  (window as unknown as { __toggleOneline: () => void }).__toggleOneline = () => {
-    apply(document.body.classList.contains('oneline') === false);
-  };
+  toggleOneline = () => apply(!document.body.classList.contains('oneline'));
+  btn.addEventListener('click', toggleOneline);
 }
 
 /* —— 5.3 topic filters —— */
@@ -346,9 +278,6 @@ function initSubscribe(): void {
 }
 
 /* —— 5.6 keyboard shortcuts —— */
-let selectedIndex = -1;
-let shortcutsTrigger: HTMLElement | null = null;
-
 function visibleItems(): HTMLElement[] {
   const items: HTMLElement[] = [];
   document.querySelectorAll<HTMLElement>('[data-edition]').forEach((edition) => {
@@ -405,19 +334,10 @@ function initShortcuts(): void {
     }
   };
 
-  openBtn.addEventListener('click', () => {
-    setOpen(dialog.dataset.open !== 'true');
-  });
-  closeBtn.addEventListener('click', () => setOpen(false));
-
-  (window as unknown as { __toggleShortcuts: () => void }).__toggleShortcuts =
-    () => {
-      setOpen(dialog.dataset.open !== 'true');
-    };
-  (window as unknown as { __closeShortcuts: () => void }).__closeShortcuts =
-    () => {
-      setOpen(false);
-    };
+  toggleShortcuts = () => setOpen(dialog.dataset.open !== 'true');
+  closeShortcuts = () => setOpen(false);
+  openBtn.addEventListener('click', toggleShortcuts);
+  closeBtn.addEventListener('click', closeShortcuts);
 }
 
 function initKeyboardNav(): void {
@@ -429,22 +349,18 @@ function initKeyboardNav(): void {
 
     if (key === '?' || (key === '/' && event.shiftKey)) {
       event.preventDefault();
-      (
-        window as unknown as { __toggleShortcuts?: () => void }
-      ).__toggleShortcuts?.();
+      toggleShortcuts();
       return;
     }
 
     if (key === 'Escape') {
-      (
-        window as unknown as { __closeShortcuts?: () => void }
-      ).__closeShortcuts?.();
+      closeShortcuts();
       return;
     }
 
     if (key === 'o' || key === 'O') {
       event.preventDefault();
-      (window as unknown as { __toggleOneline?: () => void }).__toggleOneline?.();
+      toggleOneline();
       return;
     }
 
@@ -466,15 +382,20 @@ function initKeyboardNav(): void {
 }
 
 /* —— 5.8 commit graph —— */
-let graphRaf = 0;
-let lastFill = -1;
-
 function scheduleGraphUpdate(): void {
-  if (graphRaf) return;
-  graphRaf = requestAnimationFrame(() => {
-    graphRaf = 0;
+  if (graphPending) return;
+  graphPending = true;
+
+  const flush = () => {
+    if (!graphPending) return;
+    graphPending = false;
     updateGraph();
-  });
+  };
+
+  // Prefer rAF, but always fall back — some embeds pause rAF and would
+  // otherwise leave the fill stuck at 0 forever.
+  requestAnimationFrame(flush);
+  window.setTimeout(flush, 32);
 }
 
 function updateGraph(): void {
@@ -495,12 +416,18 @@ function updateGraph(): void {
     lastFill = fill;
   }
 
-  const passed = (el: HTMLElement, centerOffset: number) =>
-    fill >= lineH - 1 || el.offsetTop + centerOffset - lineTop <= fill;
+  // Position along the track, relative to the graph box (more reliable than offsetTop).
+  const alongTrack = (el: HTMLElement, centerOffset: number) =>
+    el.getBoundingClientRect().top - r.top + centerOffset - lineTop;
+
+  const isPassed = (el: HTMLElement, centerOffset: number) =>
+    fill >= lineH - 1 || alongTrack(el, centerOffset) <= fill;
 
   graph.querySelectorAll<HTMLElement>('[data-graph-dot]').forEach((dot) => {
     if (dot.classList.contains('is-head')) return;
-    const on = passed(dot.parentElement as HTMLElement, 6);
+    const edition = dot.closest<HTMLElement>('[data-edition]');
+    if (!edition) return;
+    const on = isPassed(edition, 6);
     if (dot.classList.contains('is-passed') !== on) {
       dot.classList.toggle('is-passed', on);
     }
@@ -509,7 +436,7 @@ function updateGraph(): void {
   const rootDot = graph.querySelector<HTMLElement>('[data-graph-root-dot]');
   const root = graph.querySelector<HTMLElement>('[data-graph-root]');
   if (rootDot && root) {
-    const on = passed(root, 7);
+    const on = isPassed(root, 7);
     if (rootDot.classList.contains('is-passed') !== on) {
       rootDot.classList.toggle('is-passed', on);
     }
@@ -517,10 +444,37 @@ function updateGraph(): void {
 }
 
 function initGraph(): void {
-  scheduleGraphUpdate();
-  window.addEventListener('scroll', scheduleGraphUpdate, {
+  updateGraph();
+  const onScrollOrResize = () => scheduleGraphUpdate();
+  window.addEventListener('scroll', onScrollOrResize, {
     capture: true,
     passive: true,
   });
-  window.addEventListener('resize', scheduleGraphUpdate);
+  window.addEventListener('resize', onScrollOrResize);
 }
+
+/* —— bootstrap (after all lets/functions are initialized) —— */
+function bootstrap(): void {
+  document.documentElement.classList.add('js');
+  if (prefersReducedMotion()) {
+    document.documentElement.classList.add('reduced-motion');
+  }
+
+  initEditions();
+  initOneline();
+  initGrep();
+  initCopySlack();
+  initSubscribe();
+  initShortcuts();
+  initKeyboardNav();
+  initGraph();
+  initFocusVersion();
+  handleInitialHash();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
+} else {
+  bootstrap();
+}
+
