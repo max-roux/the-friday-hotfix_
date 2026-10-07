@@ -1,6 +1,14 @@
+---
+interface Props {
+  /** '/' on pages without the log (404), so the links go back home. */
+  base?: string;
+}
+const { base = '' } = Astro.props;
+---
+
 <header class="site-header">
   <div class="col site-header__inner">
-    <a class="site-header__brand" href="#top">
+    <a class="site-header__brand" href={`${base}#top`}>
       <svg class="site-header__mark" viewBox="0 0 64 64" width="24" height="24" aria-hidden="true">
         <path d="M24 10 V54" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" fill="none"></path>
         <path d="M24 18 C24 26 40 24 40 32 C40 40 24 38 24 46" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" fill="none"></path>
@@ -17,9 +25,9 @@
       </span>
     </a>
     <nav class="site-nav" aria-label="Site">
-      <a href="#log">log</a>
-      <a href="#blame">blame</a>
-      <a href="#subscribe">subscribe</a>
+      <a href={`${base}#log`}>log</a>
+      <a href={`${base}#blame`}>blame</a>
+      <a href={`${base}#follow`}>follow</a>
     </nav>
   </div>
 </header>

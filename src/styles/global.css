@@ -242,26 +242,22 @@ html:not(.js) .cursor {
   white-space: nowrap;
 }
 
-.hero__subscribe {
+/* Long lead line would scroll the page sideways on phones (§6). */
+@media (max-width: 640px) {
+  .hero__intro-line--lead {
+    white-space: normal;
+  }
+}
+
+.hero__follow {
   margin-top: 48px;
 }
 
-.hero__status {
+.hero__hint {
   margin: 8px 0 0;
   min-height: 1.7em;
   font-size: var(--fs-small);
   line-height: 1.7;
-}
-
-.hero__status.is-error {
-  color: var(--diff-del);
-}
-
-.hero__status.is-ok {
-  color: var(--diff-add);
-}
-
-.hero__status.is-muted {
   color: var(--muted);
 }
 
@@ -271,59 +267,76 @@ html:not(.js) .cursor {
   color: var(--muted);
 }
 
-/* —— Subscribe form —— */
-.subscribe-form {
+/* —— Follow prompt —— */
+.follow {
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
   padding: 6px 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
+  gap: 8px;
 }
 
-.subscribe-form__label {
+.follow__label {
   color: var(--muted);
   font-size: var(--fs-small);
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
+  margin-right: auto;
+  padding-right: 8px;
 }
 
-.subscribe-form__input {
-  flex: 1 1 200px;
-  min-width: 0;
-  height: 48px;
-  border: none;
-  background: transparent;
-  font-family: var(--font);
-  font-size: var(--fs-base);
-  color: var(--ink);
-  outline: none;
-}
-
-.subscribe-form__input::placeholder {
-  color: var(--muted);
-}
-
-.subscribe-form__input:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-.subscribe-form__submit {
+.follow__link,
+.btn {
   min-height: 44px;
   min-width: 44px;
-  padding: 0 16px;
-  background: var(--ink);
-  color: var(--paper);
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: var(--fs-small);
+  color: var(--ink);
 }
 
-.subscribe-form__submit:hover:not(:disabled) {
+.follow__link--primary,
+.btn--primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.follow__link:hover,
+.btn:hover {
+  text-decoration: none;
+  border-color: var(--ink);
+}
+
+.follow__link--primary:hover,
+.btn--primary:hover {
   opacity: 0.9;
+}
+
+/* —— 404 —— */
+.not-found__error {
+  margin: 32px 0 0;
+  color: var(--diff-del);
+  overflow-wrap: anywhere;
+}
+
+.not-found__path {
+  overflow-wrap: anywhere;
+}
+
+.not-found__actions {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 /* —— Log —— */
@@ -797,6 +810,12 @@ body.oneline .edition__stats {
   color: var(--muted);
 }
 
+.site-footer__eof {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Keyboard hint is meaningless on touch-only devices. */
 @media (hover: none) {
   .site-footer__keys {
@@ -874,4 +893,8 @@ body.oneline .edition__stats {
   .graph__root-dot {
     transition: none;
   }
+}
+
+.not-found__error + .hero__intro {
+  margin-top: 16px;
 }

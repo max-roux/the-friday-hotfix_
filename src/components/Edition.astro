@@ -59,6 +59,14 @@ const slack = slackCopy(edition, SITE_URL);
       <span class:list={['edition__label', { 'is-head': edition.isHead }]}>{label}</span>
       <span aria-hidden="true">·</span>
       <span>{edition.dateLabel}</span>
+      {
+        edition.isHead && edition.mood && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>mood: {edition.mood}</span>
+          </>
+        )
+      }
     </span>
     <span class="edition__toggle-icon" data-edition-icon aria-hidden="true">[−]</span>
   </button>

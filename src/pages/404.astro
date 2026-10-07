@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="404 · The Friday Hotfix" canonicalPath="/404">
+  <Header base="/" />
+  <main>
+    <section class="hero">
+      <div class="col">
+        <p class="section-label not-found__path">$ git checkout <span data-404-path>this-page</span></p>
+        <h1 class="hero__title">404<span class="cursor is-idle" aria-hidden="true">_</span></h1>
+        <p class="not-found__error">
+          error: pathspec '<span data-404-path>this-page</span>' did not match any file(s) known to git
+        </p>
+        <p class="hero__intro">This page was reverted, renamed or never merged. Nothing to hotfix here.</p>
+        <div class="not-found__actions">
+          <a class="btn btn--primary" href="/">git checkout main ↵</a>
+          <a class="btn" href="/#log">git log</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer shortcuts={false} />
+  <script is:inline>
+    document.querySelectorAll('[data-404-path]').forEach(function (el) {
+      el.textContent = location.pathname;
+    });
+  </script>
+</BaseLayout>
