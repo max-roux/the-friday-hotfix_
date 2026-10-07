@@ -1,0 +1,74 @@
+---
+import type { PreparedEdition } from '../lib/editions';
+import Edition from './Edition.astro';
+
+interface Props {
+  editions: PreparedEdition[];
+  focusVersion?: string;
+}
+
+const { editions, focusVersion } = Astro.props;
+const topics = [
+  { value: '*', label: '--grep=*' },
+  { value: 'platform', label: '--grep=platform' },
+  { value: 'bi', label: '--grep=bi' },
+  { value: 'ai', label: '--grep=ai' },
+] as const;
+---
+
+<section class="log" id="log">
+  <div class="col">
+    <p class="section-label">$ git log --graph</p>
+
+    <div class="log-controls">
+      <div class="log-controls__filters" role="group" aria-label="Filter by topic">
+        {
+          topics.map((topic, index) => (
+            <button
+              class="chip"
+              type="button"
+              data-grep={topic.value}
+              aria-pressed={index === 0 ? 'true' : 'false'}
+            >
+              {topic.label}
+            </button>
+          ))
+        }
+      </div>
+      <div class="log-controls__right">
+        <button
+          class="chip"
+          type="button"
+          data-oneline
+          aria-pressed="false"
+        >
+          --oneline
+        </button>
+        <button
+          class="icon-btn"
+          type="button"
+          data-shortcuts-open
+          aria-label="Keyboard shortcuts"
+        >
+          ?
+        </button>
+      </div>
+    </div>
+
+    <div class="graph" data-graph>
+      <div class="graph__track" aria-hidden="true"></div>
+      <div class="graph__fill" data-graph-fill aria-hidden="true"></div>
+
+      {
+        editions.map((edition) => (
+          <Edition edition={edition} focusVersion={focusVersion} />
+        ))
+      }
+
+      <div class="graph__root" data-graph-root>
+        <span class="graph__root-dot" data-graph-root-dot aria-hidden="true"></span>
+        0d0d0d0&nbsp;&nbsp;initial commit: "how hard can a weekly newsletter be?"
+      </div>
+    </div>
+  </div>
+</section>

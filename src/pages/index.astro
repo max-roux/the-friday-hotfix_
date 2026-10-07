@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Home from '../components/Home.astro';
+import { getEditions } from '../lib/editions';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../lib/site';
+
+const editions = await getEditions();
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION} ogTitle="The Friday Hotfix">
+  <Home editions={editions} />
+</BaseLayout>

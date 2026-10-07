@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Home from '../components/Home.astro';
+import { getEditions } from '../lib/editions';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../lib/site';
+
+export async function getStaticPaths() {
+  const editions = await getEditions();
+  return editions.map((edition) => ({
+    params: { version: edition.version },
+    props: { edition },
+  }));
+}
+
+const { edition } = Astro.props;
+const editions = await getEditions();
+const ogTitle = `${edition.title} · ${edition.version}`;
+const description = `${edition.title} — ${SITE_DESCRIPTION}`;
+---
+
+<BaseLayout
+  title={`${ogTitle} · The Friday Hotfix`}
+  description={description}
+  ogTitle={ogTitle}
+  canonicalPath={`/${edition.version}`}
+>
+  <Home editions={editions} focusVersion={edition.version} />
+</BaseLayout>
